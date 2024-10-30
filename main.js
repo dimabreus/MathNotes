@@ -1,16 +1,25 @@
 const noteArea = document.getElementById('note-area');
 
-const variables = {
-  pi: Math.PI,
-  e: Math.E
+let variables = {}
+
+function resetVariables() {
+  variables = {
+    pi: Math.PI,
+    e: Math.E
+  }
 }
 
 function preprocessExpression(expression) {
+  expression = expression
+    .replaceAll('^', '**')
+    .replaceAll(' ', '');
+
   Object.entries(variables).forEach(([key, value]) => {
-    expression = expression.replaceAll(key, value);
+    expression = expression.replaceAll(new RegExp(`(\\d+)${key}`, 'g'), `${value}*$1`)
+      .replaceAll(key, value);
   });
 
-  return expression.replaceAll('^', '**');
+  return expression;
 }
 
 function tryEvaluateExpression(expression) {
@@ -29,12 +38,13 @@ function tryParse(line) {
 
   let [left, right] = sides.map(side => side.trim());
 
-  if (!right) {
+  if (/^[a-zA-Z]+$/.test(left) && !Object.keys(variables).includes(left)) {
+    variables[left] = tryEvaluateExpression(right) || right;
+  } else if (!right) {
     const result = tryEvaluateExpression(left);
 
-    right = result || right
+    right = result || right;
   }
-  console.log(left, right)
 
   return [left, right].join(' = ');
 }
@@ -42,13 +52,14 @@ function tryParse(line) {
 function handleChange(lines) {
   const newLines = [];
 
+  resetVariables();
+
   lines.forEach((line) => {
     const parse = tryParse(line);
 
     newLines.push(parse || line)
   });
 
-  console.log(newLines)
   return newLines
 }
 
@@ -85,3 +96,7 @@ noteArea.addEventListener('keydown', (event) => {
   const newCursorPosition = lineStart + newLine.length;
   noteArea.setSelectionRange(newCursorPosition, newCursorPosition);
 });
+
+window.addEventListener('load', () => {
+  resetVariables();
+})

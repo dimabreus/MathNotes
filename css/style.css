@@ -10,7 +10,7 @@ body {
 body .container {
   display: flex;
   justify-content: center;
-  align-items: start;
+  align-items: flex-start;
   height: 100vh;
   padding: 2rem;
 }
