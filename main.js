@@ -120,8 +120,8 @@ function preprocessExpression(expression) {
     .replaceAll('^', '**')
     .replaceAll(' ', '');
 
-  Object.entries(variables).forEach(([key, value]) => {
-    Object.entries(variables).forEach(([key2, value2]) => {
+  Object.entries(variables).reverse().forEach(([key, value]) => {
+    Object.entries(variables).reverse().forEach(([key2, value2]) => {
       expression = expression.replaceAll(key + key2, value * value2)
         .replaceAll(key2 + key, value * value2);
     });
@@ -164,11 +164,14 @@ function handleChange(lines) {
 
   resetVariables();
 
+  lines.every(line => tryParse(line));
+
   try {
-    const newVariables = solve(lines.filter(x => x && x.includes('=') && x.split('=').every(Boolean)).map(line => line.trim().replaceAll(' ', '')));
+    const filteredLines = lines.filter(x => x && x.includes('=') && x.split('=').every(Boolean)).map(line => line.trim().replaceAll(' ', ''));
+    const newVariables = solve(filteredLines);
 
     newVariables.entries().forEach(([key, value]) => {
-      if (!Object.keys(variables).includes(key)) {
+      if (!variables[key]) {
         variables[key] = value;
       }
     });
@@ -206,6 +209,8 @@ noteArea.addEventListener('keydown', (event) => {
   const parts = line.split('=');
 
   if (parts.length <= 1) return // If there aren't enough parts.
+
+  if (parts[parts.length - 1]?.trim()?.length > 1) return; // If there are enough symbols to delete each symbol individually.
 
   event.preventDefault();
 
