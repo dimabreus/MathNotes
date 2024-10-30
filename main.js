@@ -148,12 +148,12 @@ function tryParse(line) {
 
   let [left, right] = sides.map(side => side.trim());
 
-  if (/^[a-zA-Z]+$/.test(preprocessExpression(left)) && !Object.keys(variables).includes(left)) {
-    variables[left] = tryEvaluateExpression(right) || right;
-  } else if (!right) {
+  if (!right) {
     const result = tryEvaluateExpression(left);
 
     right = result || right;
+  } else if (/^[a-zA-Z]+$/.test(left) && !variables[left]) {
+    variables[left] = tryEvaluateExpression(right) || right;
   }
 
   return [left, right].join(' = ');
@@ -164,10 +164,14 @@ function handleChange(lines) {
 
   resetVariables();
 
-  lines.every(line => tryParse(line));
+  lines.forEach(line => {
+    tryParse(line);
+  });
 
   try {
-    const filteredLines = lines.filter(x => x && x.includes('=') && x.split('=').every(Boolean)).map(line => line.trim().replaceAll(' ', ''));
+    const filteredLines = lines
+      .filter(line => line.trim() && line.includes('=') && line.split('=').every(Boolean))
+      .map(line => line.trim().replaceAll(' ', ''));
     const newVariables = solve(filteredLines);
 
     newVariables.entries().forEach(([key, value]) => {
@@ -208,7 +212,7 @@ noteArea.addEventListener('keydown', (event) => {
   const line = value.slice(lineStart, lineEnd === -1 ? undefined : lineEnd);
   const parts = line.split('=');
 
-  if (parts.length <= 1) return // If there aren't enough parts.
+  if (parts.length <= 1) return; // If there aren't enough parts.
 
   if (parts[parts.length - 1]?.trim()?.length > 1) return; // If there are enough symbols to delete each symbol individually.
 
