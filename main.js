@@ -15,6 +15,10 @@ function preprocessExpression(expression) {
     .replaceAll(' ', '');
 
   Object.entries(variables).forEach(([key, value]) => {
+    Object.entries(variables).forEach(([key2, value2]) => {
+      expression = expression.replaceAll(key + key2, value * value2)
+        .replaceAll(key2 + key, value * value2);
+    });
     expression = expression.replaceAll(new RegExp(`(\\d+)${key}`, 'g'), `${value}*$1`)
       .replaceAll(key, value);
   });
@@ -38,7 +42,7 @@ function tryParse(line) {
 
   let [left, right] = sides.map(side => side.trim());
 
-  if (/^[a-zA-Z]+$/.test(left) && !Object.keys(variables).includes(left)) {
+  if (/^[a-zA-Z]+$/.test(preprocessExpression(left)) && !Object.keys(variables).includes(left)) {
     variables[left] = tryEvaluateExpression(right) || right;
   } else if (!right) {
     const result = tryEvaluateExpression(left);
