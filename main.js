@@ -125,7 +125,7 @@ function preprocessExpression(expression) {
       expression = expression.replaceAll(key + key2, value * value2)
         .replaceAll(key2 + key, value * value2);
     });
-    expression = expression.replaceAll(new RegExp(`(\\d+)${key}`, 'g'), `${value}*$1`)
+    expression = expression.replaceAll(new RegExp(`((?:\\d+\\.)?\\d+)${key}`, 'g'), `${value}*$1`)
       .replaceAll(key, value);
   });
 
