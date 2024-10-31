@@ -214,7 +214,7 @@ noteArea.addEventListener('keydown', (event) => {
 
   if (parts.length <= 1) return; // If there aren't enough parts.
 
-  if (parts[parts.length - 1]?.trim()?.length > 1) return; // If there are enough symbols to delete each symbol individually.
+  if (parts[parts.length - 1]?.trim()?.length > 0) return; // If there are enough symbols to delete each symbol individually.
 
   event.preventDefault();
 
